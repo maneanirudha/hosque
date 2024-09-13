@@ -17,8 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from appoinment_app.views import book_appoinment
+from django.urls import path
+from users.views import RegisterUser, CustomAuthToken
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('book-appoinment/',book_appoinment)
+    path('book-appoinment/',book_appoinment),
+
+    path('register/', RegisterUser.as_view(), name='register'),
+    path('login/', CustomAuthToken.as_view(), name='login'),
 ]
