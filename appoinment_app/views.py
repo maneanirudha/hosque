@@ -13,31 +13,50 @@ from datetime import date
 def view_appoinment(request):
     return JsonResponse({"message":"Hello!"})
 
+
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])  # Use token authentication
 @permission_classes([IsAuthenticated])
 def book_appoinment(request):
     user_id = request.user.id
     print(user_id)
-    data = [{"user_id":user_id}]
+    data = {"user_id":user_id}
 
     try:
         appointmentData.objects.get(date=date.today())
     except appointmentData.DoesNotExist:
-        appointmentData.objects.create(date=date.today(),total_appointments=data)
+        appointmentData.objects.create(date=date.today(),total_appointments=[{"user_id":user_id,"token_number":1}],current_token=1)
+        return JsonResponse({'message':'Appoinment booked successfully!','token_number':1})
         
     dat = appointmentData.objects.get(date=date.today())
     print(bool(dat))
     
-    if dat:
+    if dat and dat.current_token != 4:
         current_list = dat.total_appointments
         print(current_list)
-        data.append(current_list)
-        print(data)
-        dat.total_appointments = data
-        dat.save()
-    else:
-        pass
+        user_list = [user['user_id'] for user in current_list]
+        print(user_list)
+        if user_id not in user_list:
+            token_num = dat.current_token+1
+            current_list.append({"user_id":user_id,"token_number":token_num})
+            dat.current_token+=1
+            print(current_list)
+            # Use a list comprehension with a helper set to remove duplicates
+            seen = set()
+            unique_list = []
+            for d in current_list:
+                # Convert dictionary to a frozenset of items for immutability
+                item = frozenset(d.items())
+                if item not in seen:
+                    seen.add(item)
+                    unique_list.append(d)
 
-    # print(dat.total_appointments)
-    return JsonResponse({'message':'Hello from POST API'})
+            print(unique_list)
+
+            dat.total_appointments = unique_list
+            dat.save()
+            return JsonResponse({'message':'Appoinment booked successfully!','token_number':token_num})
+        else:
+            return JsonResponse({'message':'You have already booked the appointment!'})
+    else:
+        return JsonResponse({'message':'today quota is over!'})
