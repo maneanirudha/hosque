@@ -27,6 +27,14 @@ def register(request):
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
+        """
+        body : 
+        {
+  "username": "newuser",
+  "password": "password123"
+    }
+
+        """
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
         serializer.is_valid(raise_exception=True)

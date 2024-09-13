@@ -18,6 +18,19 @@ def view_appoinment(request):
 @authentication_classes([TokenAuthentication])  # Use token authentication
 @permission_classes([IsAuthenticated])
 def book_appoinment(request):
+    """
+    body :
+    {
+  "username": "newuser",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "johndoe@example.com",
+  "password": "password123",
+  "mobile_number": "1234567890"
+    }   
+
+    
+    """
     user_id = request.user.id
     print(user_id)
     data = {"user_id":user_id}
